@@ -366,22 +366,13 @@ const today   = () => new Date().toISOString().split('T')[0];
 const esc     = (s) => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fmtDate = (d) => { if (!d) return '—'; const dt = new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); };
 const isOverdue = (e,s) => e && s !== 'Done' && e < today();
-const daysLeft = (e, s) => {
+const daysLeft  = (e,s) => {
   if (s === 'Done') return '✓ Done';
   if (!e) return '—';
-
-  const now = new Date();
-  now.setHours(0,0,0,0);
-
-  const end = new Date(e + 'T00:00:00');
-
-  const d = Math.ceil((end - now) / 86400000);
-
+  const d = Math.ceil((new Date(e+'T00:00:00') - new Date()) / 86400000);
   if (d < 0) return `${Math.abs(d)}d late`;
   if (d === 0) return 'Today';
-
   return `${d}d left`;
-};
 };
 const urgClass = {Urgent:'u-urgent',High:'u-high',Medium:'u-medium',Low:'u-low'};
 const stClass  = {'To Do':'s-todo',WIP:'s-wip',Done:'s-done'};
@@ -434,12 +425,9 @@ const loadLocal = () => {
 
 // ── API ──
 const apiGet = async () => {
-  const res = await fetch(
-     `${WEB_APP_URL}?sheetId=${encodeURIComponent(SHEET_ID)}&payload=${encoded}&_=${Date.now()}`,
-  {
+  const res = await fetch(`${WEB_APP_URL}?action=getTasks&_=${Date.now()}`, {
     redirect: 'follow'
-  }
-);
+  });
   const text = await res.text();
   const data = JSON.parse(text);
   if (data.error) throw new Error(data.error);
@@ -482,9 +470,7 @@ const renderTasks = () => {
   const fUrg    = document.getElementById('filterUrgency').value;
 
   let filtered = tasks.filter(t => {
-    const ms =
-      (t.task || '').toLowerCase().includes(search) ||
-      (t.remarks || '').toLowerCase().includes(search);
+    const ms = t.task.toLowerCase().includes(search) || (t.remarks||'').toLowerCase().includes(search);
     const mst = !fStatus || t.status === fStatus;
     const mu  = !fUrg    || t.urgency === fUrg;
     return ms && mst && mu;
@@ -661,11 +647,6 @@ if (WEB_APP_URL && SHEET_ID) {
   loadLocal();
   renderTasks();
 }
-  setInterval(() => {
-  if (isConnected) {
-    loadTasks();
-  }
-}, 30000);
 </script>
 </body>
 </html>
