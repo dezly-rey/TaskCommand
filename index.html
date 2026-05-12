@@ -398,7 +398,6 @@ const connectSheets = async () => {
   const url   = document.getElementById('inputWebAppUrl').value.trim();
   const sheet = document.getElementById('inputSheetId').value.trim();
   if (!url)   { showToast('Please enter the Web App URL','error'); return; }
-  if (!sheet) { showToast('Please enter the Spreadsheet ID','error'); return; }
   WEB_APP_URL = url;
   SHEET_ID    = sheet;
   localStorage.setItem('tc_url',   WEB_APP_URL);
@@ -637,7 +636,7 @@ document.addEventListener('keydown', e => {
 document.getElementById('todayBadge').textContent = new Date().toLocaleDateString('en-PH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
 
 // ── Init ──
-if (WEB_APP_URL && SHEET_ID) {
+if (WEB_APP_URL) {
   isConnected = true;
   document.getElementById('syncBar').classList.remove('hidden');
   document.getElementById('setupBanner').classList.add('hidden');
